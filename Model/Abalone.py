@@ -26,3 +26,7 @@ class Abalone:
         for attribute, value in self.__dict__.items():
             output += f"{attribute.ljust(max_attribute_width)}: {value}\n"
         return output
+
+    # Return a dictionary of the penguin attributes
+    def to_dictionary(self):
+        return self.__dict__
