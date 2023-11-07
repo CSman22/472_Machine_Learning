@@ -5,10 +5,13 @@ Description : Assignment 1
 """
 from sklearn.model_selection import train_test_split
 from sklearn import tree
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
+from sklearn.metrics import accuracy_score
+import statistics
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -19,6 +22,7 @@ from Model.Abalone import *
 class Machine_Learning_Algorithm:
     penguin_path: str = "Data/penguins.csv"
     abalone_path: str = "Data/abalone.csv"
+    graph_path: str = "Graph"
 
     def __init__(self, data_option=0):
         self.data_option = data_option
@@ -72,7 +76,9 @@ class Machine_Learning_Algorithm:
             ax.pie(species_count, labels=species_count.index, autopct="%1.1f%%")
             ax.set_title("Percentage of Penguin Species")
             ax.axis("equal")
-            plt.savefig("penguin-classes.gif", format="png", dpi=100)
+            file_name = "penguin-classes.gif"
+            graph_path = os.path.join(os.getcwd(), self.graph_path, file_name)
+            plt.savefig(graph_path, format="png")
             # plt.show()
         elif self.data_option == 2:
             type_count = object_df["Type"].value_counts()
@@ -81,7 +87,9 @@ class Machine_Learning_Algorithm:
             ax.pie(type_count, labels=type_count.index, autopct="%1.1f%%")
             ax.set_title("Percentage of Abalone Type")
             ax.axis("equal")
-            plt.savefig("abalone-classes.gif", format="png", dpi=100)
+            file_name = "abalone-classes.gif"
+            graph_path = os.path.join(os.getcwd(), self.graph_path, file_name)
+            plt.savefig(graph_path, format="png")
             # plt.show()
 
     # Split of the dataset into training and testing
@@ -116,6 +124,47 @@ class Machine_Learning_Algorithm:
         )
         return x_train, x_test, y_train, y_test
 
+    # Calculate the performance of the model
+    def performance(
+        self, accuracy_list, macro_f1_list, weighted_f1_list, y_test, predictions
+    ):
+        # Performance of the decision tree
+        conf_matrix = confusion_matrix(y_test, predictions)
+        precision = precision_score(y_test, predictions, average=None) * 100
+        recall = recall_score(y_test, predictions, average=None) * 100
+        f1 = f1_score(y_test, predictions, average=None) * 100
+        macro_f1 = f1_score(y_test, predictions, average="macro") * 100
+        weighted_f1 = f1_score(y_test, predictions, average="weighted") * 100
+        accuracy_percentage = accuracy_score(y_test, predictions) * 100
+
+        # String representation of the performance
+        result = ""
+        result += f"(5.B) The Confusion Matrix:\n{conf_matrix}\n"
+        result += "(5.C)\n"
+        # Iterate through each class
+        for i in range(len(precision)):
+            result += f"Class {i}: Precision {precision[i]:.2f}% | Recall {recall[i]:.2f}% | F1 {f1[i]:.2f}%\n"
+        result += f"(5.D)\n"
+        result += f"Accuracy           : {accuracy_percentage:.2f}%\n"
+        result += f"Macro-average F1   : {macro_f1:.2f}%\n"
+        result += f"Weighted-average F1: {weighted_f1:.2f}%\n"
+
+        # Calculating the average performance
+        average_accuracy = sum(accuracy_list) / len(accuracy_list)
+        variance_accuracy = statistics.variance(accuracy_list)
+        stdev_accuracy = statistics.stdev(accuracy_list)
+        average_macro_f1 = sum(macro_f1_list) / len(macro_f1_list)
+        variance_macro_f1 = statistics.variance(macro_f1_list)
+        stdev_macro_f1 = statistics.stdev(macro_f1_list)
+        average_weighted_f1 = sum(weighted_f1_list) / len(weighted_f1_list)
+        variance_weighted_f1 = statistics.variance(weighted_f1_list)
+        stdev_weighted_f1 = statistics.pstdev(weighted_f1_list)
+        result += "\nRun: 5\n"
+        result += f"(6.A) Average Accuracy           : {average_accuracy:.2f}% | Variance: {variance_accuracy:.2f} | Standard Deviation: {stdev_accuracy:.2f}\n"
+        result += f"(6.B) Average Macro-average F1   : {average_macro_f1:.2f}% | Variance: {variance_macro_f1:.2f} | Standard Deviation: {stdev_macro_f1:.2f}\n"
+        result += f"(6.C) Average Weighted-average F1: {average_weighted_f1:.2f}% | Variance: {variance_weighted_f1:.2f} | Standard Deviation: {stdev_weighted_f1:.2f}\n"
+        return result
+
     # Base Decision Tree Classifier
     def base_dt(self, x_train, y_train, x_test, y_test):
         # train decision tree
@@ -124,37 +173,97 @@ class Machine_Learning_Algorithm:
         predictions = dtc.predict(x_test)
         # print(predictions)
 
-        # Performance of the decision tree
-        conf_matrix = confusion_matrix(y_test, predictions)
-        precision = precision_score(y_test, predictions, average=None) * 100
-        recall = recall_score(y_test, predictions, average=None) * 100
-        f1 = f1_score(y_test, predictions, average=None) * 100
-        macro_f1 = f1_score(y_test, predictions, average="macro") * 100
-        weighted_f1 = f1_score(y_test, predictions, average="weighted") * 100
-        accuracy_percentage = dtc.score(x_test, y_test) * 100
-
-        # String representation of the performance
-        result = "***(5.A) Base-DT***\n"
-        result += f"(B) The Confusion Matrix:\n{conf_matrix}\n"
-        result += "(C) The precision, recall, and F1-measure for each class:\n"
-        # Iterate through precision scores
-        for i in range(len(precision)):
-            result += f"Class {i}: Precision {precision[i]:.2f} | Recall {recall[i]:.2f} | F1 {f1[i]:.2f}\n"
-        result += f"(D) The accuracy, macro-average F1 and weighted-average F1 of the model:\n"
-        result += f"Accuracy: {accuracy_percentage:.2f}% | Macro-average F1: {macro_f1:.2f}% | weighted-average F1: {weighted_f1:.2f}%\n "
-        print(result)
-
         # Plot the decision tree
         fig = plt.figure(figsize=(25, 20))
         tree.plot_tree(dtc)
-        fig.savefig("base_DT_graph.png")
-        return result
+        file_name = "base_DT_graph.png"
+        graph_path = os.path.join(os.getcwd(), self.graph_path, file_name)
+        fig.savefig(graph_path, format="png")
+
+        # Part 6 Calculating the average performance
+        accuracy_list = []
+        macro_f1_list = []
+        weighted_f1_list = []
+        for i in range(5):
+            dtc = tree.DecisionTreeClassifier()
+            dtc.fit(x_train, y_train)
+            predictions = dtc.predict(x_test)
+            accuracy_list.append(accuracy_score(y_test, predictions) * 100)
+            macro_f1_list.append(f1_score(y_test, predictions, average="macro") * 100)
+            weighted_f1_list.append(
+                f1_score(y_test, predictions, average="weighted") * 100
+            )
+        # Get the performance results
+        dt_result = self.performance(
+            accuracy_list, macro_f1_list, weighted_f1_list, y_test, predictions
+        )
+        part_a = "(5.A) *** Base-DT ***\n"
+        dt_result = part_a + dt_result
+        return dt_result
+
+    # Top Decision Tree Classifier
+    def top_dt(self, x_train, y_train, x_test, y_test):
+        dtc = tree.DecisionTreeClassifier()
+        params_dict = {
+            "criterion": ["gini", "entropy"],
+            "max_depth": [None, 5, 10],
+            "min_samples_split": [2, 5, 10],
+        }
+        grid = None
+        if self.data_option == 1:
+            grid = GridSearchCV(
+                dtc, param_grid=params_dict, scoring="f1_weighted", cv=10, n_jobs=-1
+            )
+        elif self.data_option == 2:
+            grid = GridSearchCV(
+                dtc, param_grid=params_dict, scoring="f1_macro", cv=10, n_jobs=-1
+            )
+        grid.fit(x_train, y_train)
+        # print(grid.best_params_)
+
+        # train decision tree with the best parameters
+        top_dtc = tree.DecisionTreeClassifier(**grid.best_params_)
+        top_dtc.fit(x_train, y_train)
+        predictions = top_dtc.predict(x_test)
+        # print(predictions)
+
+        # Plot the decision tree
+        fig = plt.figure(figsize=(25, 20))
+        tree.plot_tree(top_dtc)
+        file_name = "top_DT_graph.png"
+        graph_path = os.path.join(os.getcwd(), self.graph_path, file_name)
+        fig.savefig(graph_path, format="png")
+
+        # Part 6 Calculating the average performance
+        accuracy_list = []
+        macro_f1_list = []
+        weighted_f1_list = []
+        for i in range(5):
+            top_dtc = tree.DecisionTreeClassifier(**grid.best_params_)
+            top_dtc.fit(x_train, y_train)
+            predictions = top_dtc.predict(x_test)
+            accuracy_list.append(accuracy_score(y_test, predictions) * 100)
+            macro_f1_list.append(f1_score(y_test, predictions, average="macro") * 100)
+            weighted_f1_list.append(
+                f1_score(y_test, predictions, average="weighted") * 100
+            )
+        # Get the performance results
+        top_dt_result = self.performance(
+            accuracy_list, macro_f1_list, weighted_f1_list, y_test, predictions
+        )
+        part_a = "(5.A) *** Top-DT ***\n"
+        top_dt_result = part_a + top_dt_result
+        return top_dt_result
 
     # Write into file
-    def write_to_file(self, dt_result):
+    def write_to_file(self, dt_result, top_dt_result):
         output = "Jackey Weng 40130001\n"
-        output += ""
+        output += "\n"
+        output += "Performance report \n"
+        output += "----------------------------------------------------\n"
         output += dt_result
+        output += "----------------------------------------------------\n"
+        output += top_dt_result
         # record information to file
         if self.data_option == 1:
             with open("penguin-performance.txt", "w") as file:
@@ -212,12 +321,19 @@ def main():
     x_train, x_test, y_train, y_test = MLP.train_test_set(dataset)
     # print(y_test.head(10))
 
-    # Step 4 train model
-    # 4.a Base Decision Tree Classifier
+    # Step 4, 5 & 6 train model and get performance
+    # A) Base Decision Tree Classifier
     dt_result = MLP.base_dt(x_train, y_train, x_test, y_test)
+    print("Performance Report")
+    print_separator()
+    print(dt_result)
+    # B) Top Decision Tree Classifier
+    top_dt_result = MLP.top_dt(x_train, y_train, x_test, y_test)
+    print_separator()
+    print(top_dt_result)
 
-    # Step 5 Write to file: performance of the model
-    MLP.write_to_file(dt_result)
+    # Write to file: performance of the model
+    MLP.write_to_file(dt_result, top_dt_result)
 
 
 if __name__ == "__main__":
