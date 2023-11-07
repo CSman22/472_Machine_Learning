@@ -1,0 +1,13 @@
+Jackey Weng 40130001
+***(5.A) Base-DT***
+(B) The Confusion Matrix:
+[[38  0  0]
+ [ 2 14  0]
+ [ 0  0 30]]
+(C) The precision, recall, and F1-measure for each class:
+Class 0: Precision 95.00 | Recall 100.00 | F1 97.44
+Class 1: Precision 100.00 | Recall 87.50 | F1 93.33
+Class 2: Precision 100.00 | Recall 100.00 | F1 100.00
+(D) The accuracy, macro-average F1 and weighted-average F1 of the model:
+Accuracy: 97.62% | Macro-average F1: 96.92% | weighted-average F1: 97.57%
+ 
