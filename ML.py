@@ -5,6 +5,7 @@ Description : Assignment 1
 """
 from sklearn.model_selection import train_test_split
 from sklearn import tree
+from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import precision_score
@@ -23,6 +24,7 @@ class Machine_Learning_Algorithm:
     penguin_path: str = "Data/penguins.csv"
     abalone_path: str = "Data/abalone.csv"
     graph_path: str = "Graph"
+    performance_path: str = "Performance"
 
     def __init__(self, data_option=0):
         self.data_option = data_option
@@ -171,7 +173,6 @@ class Machine_Learning_Algorithm:
         dtc = tree.DecisionTreeClassifier()
         dtc.fit(x_train, y_train)
         predictions = dtc.predict(x_test)
-        # print(predictions)
 
         # Plot the decision tree
         fig = plt.figure(figsize=(25, 20))
@@ -187,12 +188,10 @@ class Machine_Learning_Algorithm:
         for i in range(5):
             dtc = tree.DecisionTreeClassifier()
             dtc.fit(x_train, y_train)
-            predictions = dtc.predict(x_test)
-            accuracy_list.append(accuracy_score(y_test, predictions) * 100)
-            macro_f1_list.append(f1_score(y_test, predictions, average="macro") * 100)
-            weighted_f1_list.append(
-                f1_score(y_test, predictions, average="weighted") * 100
-            )
+            pred = dtc.predict(x_test)
+            accuracy_list.append(accuracy_score(y_test, pred) * 100)
+            macro_f1_list.append(f1_score(y_test, pred, average="macro") * 100)
+            weighted_f1_list.append(f1_score(y_test, pred, average="weighted") * 100)
         # Get the performance results
         dt_result = self.performance(
             accuracy_list, macro_f1_list, weighted_f1_list, y_test, predictions
@@ -221,12 +220,9 @@ class Machine_Learning_Algorithm:
         grid.fit(x_train, y_train)
         # print(grid.best_params_)
 
-        # train decision tree with the best parameters
         top_dtc = tree.DecisionTreeClassifier(**grid.best_params_)
         top_dtc.fit(x_train, y_train)
         predictions = top_dtc.predict(x_test)
-        # print(predictions)
-
         # Plot the decision tree
         fig = plt.figure(figsize=(25, 20))
         tree.plot_tree(top_dtc)
@@ -239,14 +235,13 @@ class Machine_Learning_Algorithm:
         macro_f1_list = []
         weighted_f1_list = []
         for i in range(5):
+            # train decision tree with the best parameters
             top_dtc = tree.DecisionTreeClassifier(**grid.best_params_)
             top_dtc.fit(x_train, y_train)
-            predictions = top_dtc.predict(x_test)
-            accuracy_list.append(accuracy_score(y_test, predictions) * 100)
-            macro_f1_list.append(f1_score(y_test, predictions, average="macro") * 100)
-            weighted_f1_list.append(
-                f1_score(y_test, predictions, average="weighted") * 100
-            )
+            pred = top_dtc.predict(x_test)
+            accuracy_list.append(accuracy_score(y_test, pred) * 100)
+            macro_f1_list.append(f1_score(y_test, pred, average="macro") * 100)
+            weighted_f1_list.append(f1_score(y_test, pred, average="weighted") * 100)
         # Get the performance results
         top_dt_result = self.performance(
             accuracy_list, macro_f1_list, weighted_f1_list, y_test, predictions
@@ -255,8 +250,70 @@ class Machine_Learning_Algorithm:
         top_dt_result = part_a + top_dt_result
         return top_dt_result
 
+    # Base Multi-Layer Perceptron Classifier
+    def base_mlp(self, x_train, y_train, x_test, y_test):
+        # Part 6 Calculating the average performance
+        accuracy_list = []
+        macro_f1_list = []
+        weighted_f1_list = []
+        predictions = None
+        for i in range(5):
+            mlp = MLPClassifier(
+                hidden_layer_sizes=(100, 100), activation="logistic", solver="sgd"
+            )
+            mlp.fit(x_train, y_train)
+            predictions = mlp.predict(x_test)
+            accuracy_list.append(accuracy_score(y_test, predictions) * 100)
+            macro_f1_list.append(f1_score(y_test, predictions, average="macro") * 100)
+            weighted_f1_list.append(
+                f1_score(y_test, predictions, average="weighted") * 100
+            )
+        # Get the performance results
+        mlp_result = self.performance(
+            accuracy_list, macro_f1_list, weighted_f1_list, y_test, predictions
+        )
+        part_a = "(5.A) *** Base_MLP ***\n"
+        mlp_result = part_a + mlp_result
+        return mlp_result
+
+    # Top Multi-Layer Perceptron Classifier
+    def top_mlp(self, x_train, y_train, x_test, y_test):
+        mlp = MLPClassifier(max_iter=500)
+        params_dict = {
+            "hidden_layer_sizes": [(1000,), (100, 100, 100, 100)],
+            "activation": ["logistic", "tanh", "relu"],
+            "solver": ["sgd", "adam"],
+        }
+        grid = GridSearchCV(mlp, param_grid=params_dict, cv=5, n_jobs=-1)
+
+        grid.fit(x_train, y_train)
+        # print(grid.best_params_)
+        # print(predictions)
+
+        # Part 6 Calculating the average performance
+        accuracy_list = []
+        macro_f1_list = []
+        weighted_f1_list = []
+        predictions = None
+        for i in range(5):
+            mlp = MLPClassifier(**grid.best_params_)
+            mlp.fit(x_train, y_train)
+            predictions = mlp.predict(x_test)
+            accuracy_list.append(accuracy_score(y_test, predictions) * 100)
+            macro_f1_list.append(f1_score(y_test, predictions, average="macro") * 100)
+            weighted_f1_list.append(
+                f1_score(y_test, predictions, average="weighted") * 100
+            )
+        # Get the performance results
+        top_mlp_result = self.performance(
+            accuracy_list, macro_f1_list, weighted_f1_list, y_test, predictions
+        )
+        part_a = "(5.A) *** Top_MLP ***\n"
+        top_mlp_result = part_a + top_mlp_result
+        return top_mlp_result
+
     # Write into file
-    def write_to_file(self, dt_result, top_dt_result):
+    def write_to_file(self, dt_result, top_dt_result, base_mlp_result, top_mlp_result):
         output = "Jackey Weng 40130001\n"
         output += "\n"
         output += "Performance report \n"
@@ -264,12 +321,20 @@ class Machine_Learning_Algorithm:
         output += dt_result
         output += "----------------------------------------------------\n"
         output += top_dt_result
+        output += "----------------------------------------------------\n"
+        output += base_mlp_result
+        output += "----------------------------------------------------\n"
+        output += top_mlp_result
         # record information to file
         if self.data_option == 1:
-            with open("penguin-performance.txt", "w") as file:
+            file_name = "penguin-performance.txt"
+            perf_path = os.path.join(os.getcwd(), self.performance_path, file_name)
+            with open(perf_path, "w") as file:
                 file.write(output)
         elif self.data_option == 2:
-            with open("abalone-performance.txt", "w") as file:
+            file_name = "abalone-performance.txt"
+            perf_path = os.path.join(os.getcwd(), self.performance_path, file_name)
+            with open(perf_path, "w") as file:
                 file.write(output)
 
 
@@ -321,19 +386,27 @@ def main():
     x_train, x_test, y_train, y_test = MLP.train_test_set(dataset)
     # print(y_test.head(10))
 
+    print("Performance Report")
     # Step 4, 5 & 6 train model and get performance
     # A) Base Decision Tree Classifier
     dt_result = MLP.base_dt(x_train, y_train, x_test, y_test)
-    print("Performance Report")
     print_separator()
     print(dt_result)
     # B) Top Decision Tree Classifier
     top_dt_result = MLP.top_dt(x_train, y_train, x_test, y_test)
     print_separator()
     print(top_dt_result)
+    # C) Base Multi-Layer Perceptron Classifier
+    base_mlp_result = MLP.base_mlp(x_train, y_train, x_test, y_test)
+    print_separator()
+    print(base_mlp_result)
+    # D) Top Multi-Layer Perceptron Classifier
+    top_mlp_result = MLP.top_mlp(x_train, y_train, x_test, y_test)
+    print_separator()
+    print(top_mlp_result)
 
     # Write to file: performance of the model
-    MLP.write_to_file(dt_result, top_dt_result)
+    MLP.write_to_file(dt_result, top_dt_result, base_mlp_result, top_mlp_result)
 
 
 if __name__ == "__main__":

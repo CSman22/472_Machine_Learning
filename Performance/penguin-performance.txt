@@ -1,0 +1,79 @@
+Jackey Weng 40130001
+
+Performance report 
+----------------------------------------------------
+(5.A) *** Base-DT ***
+(5.B) The Confusion Matrix:
+[[36  0  0]
+ [ 1 16  0]
+ [ 2  0 29]]
+(5.C)
+Class 0: Precision 92.31% | Recall 100.00% | F1 96.00%
+Class 1: Precision 100.00% | Recall 94.12% | F1 96.97%
+Class 2: Precision 100.00% | Recall 93.55% | F1 96.67%
+(5.D)
+Accuracy           : 96.43%
+Macro-average F1   : 96.55%
+Weighted-average F1: 96.44%
+
+Run: 5
+(6.A) Average Accuracy           : 95.48% | Variance: 0.99 | Standard Deviation: 1.00
+(6.B) Average Macro-average F1   : 95.08% | Variance: 2.35 | Standard Deviation: 1.53
+(6.C) Average Weighted-average F1: 95.54% | Variance: 0.87 | Standard Deviation: 0.84
+----------------------------------------------------
+(5.A) *** Top-DT ***
+(5.B) The Confusion Matrix:
+[[35  1  0]
+ [ 2 15  0]
+ [ 0  2 29]]
+(5.C)
+Class 0: Precision 94.59% | Recall 97.22% | F1 95.89%
+Class 1: Precision 83.33% | Recall 88.24% | F1 85.71%
+Class 2: Precision 100.00% | Recall 93.55% | F1 96.67%
+(5.D)
+Accuracy           : 94.05%
+Macro-average F1   : 92.76%
+Weighted-average F1: 94.12%
+
+Run: 5
+(6.A) Average Accuracy           : 95.24% | Variance: 0.71 | Standard Deviation: 0.84
+(6.B) Average Macro-average F1   : 94.89% | Variance: 1.84 | Standard Deviation: 1.36
+(6.C) Average Weighted-average F1: 95.26% | Variance: 0.68 | Standard Deviation: 0.74
+----------------------------------------------------
+(5.A) *** Base_MLP ***
+(5.B) The Confusion Matrix:
+[[36  0  0]
+ [17  0  0]
+ [31  0  0]]
+(5.C)
+Class 0: Precision 42.86% | Recall 100.00% | F1 60.00%
+Class 1: Precision 0.00% | Recall 0.00% | F1 0.00%
+Class 2: Precision 0.00% | Recall 0.00% | F1 0.00%
+(5.D)
+Accuracy           : 42.86%
+Macro-average F1   : 20.00%
+Weighted-average F1: 25.71%
+
+Run: 5
+(6.A) Average Accuracy           : 42.86% | Variance: 0.00 | Standard Deviation: 0.00
+(6.B) Average Macro-average F1   : 20.00% | Variance: 0.00 | Standard Deviation: 0.00
+(6.C) Average Weighted-average F1: 25.71% | Variance: 0.00 | Standard Deviation: 0.00
+----------------------------------------------------
+(5.A) *** Top_MLP ***
+(5.B) The Confusion Matrix:
+[[33  0  3]
+ [12  5  0]
+ [ 0  0 31]]
+(5.C)
+Class 0: Precision 73.33% | Recall 91.67% | F1 81.48%
+Class 1: Precision 100.00% | Recall 29.41% | F1 45.45%
+Class 2: Precision 91.18% | Recall 100.00% | F1 95.38%
+(5.D)
+Accuracy           : 82.14%
+Macro-average F1   : 74.11%
+Weighted-average F1: 79.32%
+
+Run: 5
+(6.A) Average Accuracy           : 79.76% | Variance: 71.57 | Standard Deviation: 8.46
+(6.B) Average Macro-average F1   : 70.51% | Variance: 282.76 | Standard Deviation: 16.82
+(6.C) Average Weighted-average F1: 75.90% | Variance: 153.51 | Standard Deviation: 11.08
